@@ -1,5 +1,7 @@
 <?php
 
+require "Controller.php";
+require "Database.php";
 
 class Boot {
     protected $controller = 'Index';
@@ -12,7 +14,7 @@ class Boot {
         $url = $_GET['r'];
         $url = $this->parseUrl($url);
 
-        if(file_exists('apps/controllers/'.$url[0]. '.php')) {
+        if(file_exists('apps/controllers/'.$url[0].'.php')) {
             $this->controller = $url[0];
             unset($url[0]);
 
@@ -20,7 +22,23 @@ class Boot {
         require('apps/controllers/'.$this->controller.'.php');
         $this->controller = new $this->controller;
 
-        //var_dump($url);  
+        if(isset($url[1])) {
+            if(method_exists($this->controller, $url[1])) {
+                $this->action = $url[1];
+                unset($url[1]);
+
+            }
+
+        }
+
+        if (!empty($url)) {
+            $this->params = array_values($url);
+        }
+
+        call_user_func_array([$this->controller, $this->action], $this->params);
+
+        //var_dump($url);
+        //var_dump($this->action);  
     }
 
 
